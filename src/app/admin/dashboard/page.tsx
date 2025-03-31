@@ -5,62 +5,41 @@ import Link from 'next/link';
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
-
-  // ダミーデータ（実際はAPIから取得）
-  const stats = {
-    totalQuotes: 145,
-    pendingQuotes: 28,
-    completedQuotes: 102,
-    thisMonthQuotes: 42,
-    averageAmount: 350000,
-  };
-
-  const recentQuotes = [
-    {
-      id: 'q-123456',
-      customerName: '佐藤 一郎',
-      prefecture: '東京都',
-      city: '新宿区',
-      propertyType: '一戸建て',
-      status: '未対応',
-      createdAt: '2024-03-14T09:30:00',
+  const [dashboardData, setDashboardData] = useState<{
+    stats: {
+      totalQuotes: number;
+      pendingQuotes: number;
+      completedQuotes: number;
+      thisMonthQuotes: number;
+    };
+    recentQuotes: any[];
+  }>({
+    stats: {
+      totalQuotes: 0,
+      pendingQuotes: 0,
+      completedQuotes: 0,
+      thisMonthQuotes: 0,
     },
-    {
-      id: 'q-123457',
-      customerName: '鈴木 花子',
-      prefecture: '神奈川県',
-      city: '横浜市',
-      propertyType: 'マンション',
-      status: '見積提出済',
-      createdAt: '2024-03-13T15:45:00',
-    },
-    {
-      id: 'q-123458',
-      customerName: '田中 太郎',
-      prefecture: '埼玉県',
-      city: 'さいたま市',
-      propertyType: '一戸建て',
-      status: '成約',
-      createdAt: '2024-03-12T11:20:00',
-    },
-    {
-      id: 'q-123459',
-      customerName: '高橋 恵子',
-      prefecture: '千葉県',
-      city: '千葉市',
-      propertyType: '商業施設',
-      status: '未対応',
-      createdAt: '2024-03-11T14:10:00',
-    },
-  ];
+    recentQuotes: [],
+  });
 
   useEffect(() => {
-    // ロード状態の模擬（実際はAPIコール）
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch('/api/dashboard');
+        if (!response.ok) {
+          throw new Error('データの取得に失敗しました');
+        }
+        const data = await response.json();
+        setDashboardData(data);
+      } catch (error) {
+        console.error('Dashboard data fetch error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchDashboardData();
   }, []);
 
   if (loading) {
@@ -86,7 +65,7 @@ export default function AdminDashboardPage() {
               <p className="text-sm font-medium text-gray-600">
                 総見積もり件数
               </p>
-              <p className="text-2xl font-bold">{stats.totalQuotes}</p>
+              <p className="text-2xl font-bold">{dashboardData.stats.totalQuotes}</p>
             </div>
             <div className="text-blue-500 text-3xl">📊</div>
           </div>
@@ -96,7 +75,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">未対応</p>
-              <p className="text-2xl font-bold">{stats.pendingQuotes}</p>
+              <p className="text-2xl font-bold">{dashboardData.stats.pendingQuotes}</p>
             </div>
             <div className="text-yellow-500 text-3xl">⏳</div>
           </div>
@@ -106,7 +85,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">成約完了</p>
-              <p className="text-2xl font-bold">{stats.completedQuotes}</p>
+              <p className="text-2xl font-bold">{dashboardData.stats.completedQuotes}</p>
             </div>
             <div className="text-green-500 text-3xl">✅</div>
           </div>
@@ -118,7 +97,7 @@ export default function AdminDashboardPage() {
               <p className="text-sm font-medium text-gray-600">
                 今月の見積もり
               </p>
-              <p className="text-2xl font-bold">{stats.thisMonthQuotes}</p>
+              <p className="text-2xl font-bold">{dashboardData.stats.thisMonthQuotes}</p>
             </div>
             <div className="text-purple-500 text-3xl">📅</div>
           </div>
@@ -183,14 +162,14 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {recentQuotes.map((quote) => (
+              {dashboardData.recentQuotes.map((quote) => (
                 <tr key={quote.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {quote.id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {quote.customerName}
+                      {quote.contactName}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
