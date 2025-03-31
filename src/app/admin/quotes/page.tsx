@@ -1,92 +1,44 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+interface Quote {
+  id: string;
+  contactName: string;
+  prefecture: string;
+  city: string;
+  propertyType: string;
+  status: string;
+  createdAt: string;
+}
 
 export default function QuotesListPage() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // ダミーの見積もりデータ（実際はAPIから取得）
-  const allQuotes = [
-    {
-      id: 'q-123456',
-      customerName: '佐藤 一郎',
-      prefecture: '東京都',
-      city: '新宿区',
-      propertyType: '一戸建て',
-      status: '未対応',
-      createdAt: '2024-03-14T09:30:00',
-    },
-    {
-      id: 'q-123457',
-      customerName: '鈴木 花子',
-      prefecture: '神奈川県',
-      city: '横浜市',
-      propertyType: 'マンション',
-      status: '見積提出済',
-      createdAt: '2024-03-13T15:45:00',
-    },
-    {
-      id: 'q-123458',
-      customerName: '田中 太郎',
-      prefecture: '埼玉県',
-      city: 'さいたま市',
-      propertyType: '一戸建て',
-      status: '成約',
-      createdAt: '2024-03-12T11:20:00',
-    },
-    {
-      id: 'q-123459',
-      customerName: '高橋 恵子',
-      prefecture: '千葉県',
-      city: '千葉市',
-      propertyType: '商業施設',
-      status: '未対応',
-      createdAt: '2024-03-11T14:10:00',
-    },
-    {
-      id: 'q-123460',
-      customerName: '山田 健太',
-      prefecture: '東京都',
-      city: '渋谷区',
-      propertyType: '一戸建て',
-      status: '成約',
-      createdAt: '2024-03-10T10:15:00',
-    },
-    {
-      id: 'q-123461',
-      customerName: '中村 由美',
-      prefecture: '埼玉県',
-      city: '川口市',
-      propertyType: 'マンション',
-      status: '見積提出済',
-      createdAt: '2024-03-09T16:30:00',
-    },
-    {
-      id: 'q-123462',
-      customerName: '小林 直樹',
-      prefecture: '東京都',
-      city: '世田谷区',
-      propertyType: '一戸建て',
-      status: '未対応',
-      createdAt: '2024-03-08T13:45:00',
-    },
-    {
-      id: 'q-123463',
-      customerName: '加藤 みどり',
-      prefecture: '神奈川県',
-      city: '川崎市',
-      propertyType: '一戸建て',
-      status: '成約',
-      createdAt: '2024-03-07T09:20:00',
-    },
-  ];
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/quotes?status=${statusFilter}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch quotes');
+        }
+        const data = await response.json();
+        setQuotes(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '見積もりデータの取得に失敗しました');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // フィルター適用
-  const filteredQuotes = allQuotes.filter((quote) => {
-    if (statusFilter === 'all') return true;
-    return quote.status === statusFilter;
-  });
+    fetchQuotes();
+  }, [statusFilter]);
 
   // ステータスに応じた色を取得する関数
   const getStatusColor = (status: string) => {
@@ -167,71 +119,90 @@ export default function QuotesListPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredQuotes.map((quote) => (
-                <tr key={quote.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {quote.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {quote.customerName}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center">
+                    <div className="flex justify-center items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-blue-600 rounded-full animate-spin border-t-transparent"></div>
+                      <span>読み込み中...</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {quote.prefecture} {quote.city}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {quote.propertyType}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                        quote.status
-                      )}`}
-                    >
-                      {quote.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(quote.createdAt).toLocaleDateString('ja-JP')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link
-                      href={`/admin/quotes/${quote.id}`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      詳細
-                    </Link>
                   </td>
                 </tr>
-              ))}
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-red-600">
+                    {error}
+                  </td>
+                </tr>
+              ) : quotes.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    該当する見積もりが見つかりませんでした。
+                  </td>
+                </tr>
+              ) : (
+                quotes.map((quote) => (
+                  <tr key={quote.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {quote.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {quote.contactName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {quote.prefecture} {quote.city}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {quote.propertyType}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                          quote.status
+                        )}`}
+                      >
+                        {quote.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(quote.createdAt).toLocaleDateString('ja-JP')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Link
+                        href={`/admin/quotes/${quote.id}`}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        詳細
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {filteredQuotes.length === 0 && (
-          <div className="p-6 text-center text-gray-500">
-            該当する見積もりが見つかりませんでした。
+        {!isLoading && !error && (
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                全 {quotes.length} 件表示
+              </div>
+              <div className="flex space-x-2">
+                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white">
+                  前へ
+                </button>
+                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white">
+                  次へ
+                </button>
+              </div>
+            </div>
           </div>
         )}
-
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              全 {allQuotes.length} 件中 {filteredQuotes.length} 件表示
-            </div>
-            <div className="flex space-x-2">
-              <button className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white">
-                前へ
-              </button>
-              <button className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white">
-                次へ
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

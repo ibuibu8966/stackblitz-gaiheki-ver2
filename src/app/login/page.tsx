@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -23,20 +24,18 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    // モックのログイン処理（実際にはAPI呼び出しを行う）
     try {
-      // APIコールの代わりに簡易検証
-      if (
-        formData.email === 'admin@example.com' &&
-        formData.password === 'password'
-      ) {
-        // 成功時は管理画面へリダイレクト
-        setTimeout(() => {
-          router.push('/admin/dashboard');
-        }, 1000);
-      } else {
-        // 失敗時はエラーメッセージを表示
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
         setError('メールアドレスまたはパスワードが正しくありません。');
+      } else {
+        router.push('/admin/dashboard');
+        router.refresh();
       }
     } catch (err) {
       setError('ログイン中にエラーが発生しました。再試行してください。');

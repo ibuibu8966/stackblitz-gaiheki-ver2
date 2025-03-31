@@ -31,12 +31,29 @@ export default function QuotePage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // 実際のAPIがないのでタイマーで模擬
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'エラーが発生しました');
+      }
+
+      await response.json();
       alert('見積もり依頼を受け付けました。ありがとうございます！');
-      router.push('/');
-    }, 1500);
+      router.push('/quote/confirmation');
+    } catch (error) {
+      alert('エラーが発生しました。もう一度お試しください。');
+      console.error('Error submitting quote:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

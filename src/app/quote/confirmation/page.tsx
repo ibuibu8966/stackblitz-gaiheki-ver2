@@ -1,126 +1,90 @@
 'use client';
 
-import React, { Suspense, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-// ローディング表示用コンポーネント
-function LoadingState() {
-  return (
-    <div className="flex justify-center items-center p-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-      <span className="ml-2">読み込み中...</span>
-    </div>
-  );
-}
-
-// SearchParamsを使用するコンポーネント
-function QuoteConfirmationContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // URLパラメータから見積もりIDを取得（実際のAPIには接続しない簡易版）
-  const quoteId = searchParams.get('id') || 'demo-123456';
-
-  // 見積もり依頼日時
-  const formattedDate = new Date().toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
-  // もしURLパラメータが無い場合は見積もりページにリダイレクト
-  useEffect(() => {
-    if (!searchParams.get('id') && !searchParams.get('demo')) {
-      router.push('/quote');
-    }
-  }, [router, searchParams]);
-
-  return (
-    <div className="max-w-lg mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="bg-green-600 p-6 text-white text-center">
-        <div className="text-5xl mb-4">✓</div>
-        <h1 className="text-2xl font-bold">見積もり依頼を受け付けました</h1>
-      </div>
-
-      <div className="p-6">
-        <p className="text-gray-600 mb-6">
-          お客様の見積もり依頼が正常に送信されました。ご入力いただきありがとうございます。
-        </p>
-
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-3">依頼内容の確認</h2>
-          <ul className="space-y-2">
-            <li className="flex justify-between">
-              <span className="text-gray-600">依頼ID:</span>
-              <span className="font-medium">{quoteId}</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="text-gray-600">お名前:</span>
-              <span className="font-medium">サンプル 太郎</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="text-gray-600">メールアドレス:</span>
-              <span className="font-medium">sample@example.com</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="text-gray-600">依頼日時:</span>
-              <span className="font-medium">{formattedDate}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="space-y-4 mb-8">
-          <div className="flex items-start">
-            <div className="flex-shrink-0 mr-3">
-              <span className="text-blue-600">⏱</span>
-            </div>
-            <div>
-              <h3 className="font-semibold">今後の流れ</h3>
-              <p className="text-sm text-gray-600">
-                数日以内に提携業者からご連絡いたします。見積もり内容や現地調査の日程などについてご相談させていただきます。
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start">
-            <div className="flex-shrink-0 mr-3">
-              <span className="text-blue-600">📞</span>
-            </div>
-            <div>
-              <h3 className="font-semibold">お問い合わせ</h3>
-              <p className="text-sm text-gray-600">
-                ご不明点やご質問がございましたら、お気軽にお問い合わせください。
-                <br />
-                電話: 0120-XXX-XXX（平日9:00〜18:00）
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <Link
-            href="/"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200 inline-block"
-          >
-            トップページに戻る
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// メインページコンポーネント
 export default function QuoteConfirmationPage() {
   return (
-    <div className="bg-gray-50 py-12">
+    <div className="bg-gray-50 min-h-screen py-12">
       <div className="container mx-auto px-4">
-        <Suspense fallback={<LoadingState />}>
-          <QuoteConfirmationContent />
-        </Suspense>
+        <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              お見積り依頼を受け付けました
+            </h1>
+            <p className="text-gray-600 text-lg mb-6">
+              ご依頼ありがとうございます。内容を確認次第、担当者よりご連絡させていただきます。
+            </p>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-lg mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">これからの流れ</h2>
+            <ol className="space-y-4">
+              <li className="flex items-start">
+                <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-sm font-medium mr-3 flex-shrink-0">
+                  1
+                </span>
+                <p className="text-gray-700">
+                  ご登録いただいたメールアドレスに確認メールをお送りしました。
+                </p>
+              </li>
+              <li className="flex items-start">
+                <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-sm font-medium mr-3 flex-shrink-0">
+                  2
+                </span>
+                <p className="text-gray-700">
+                  担当者が内容を確認し、複数の業者様へ見積もり依頼を行います。
+                </p>
+              </li>
+              <li className="flex items-start">
+                <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-sm font-medium mr-3 flex-shrink-0">
+                  3
+                </span>
+                <p className="text-gray-700">
+                  各業者様からの見積もり内容が揃い次第、順次ご連絡させていただきます。
+                </p>
+              </li>
+            </ol>
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/"
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                ></path>
+              </svg>
+              トップページに戻る
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
